@@ -1,4 +1,4 @@
-<ep-package name=HTML::EP::Explorer accept-language="de,en" lib="/home/joe/HTML-EP-Explorer/lib">
+<ep-package name=HTML::EP::Explorer accept-language="de,en">
 <ep-explorer-prefs>
 <ep-if cnd="'$_ep_language$' eq 'de'">
   <ep-set var="Title" val="EP-Explorer: Voreinstellungen">

@@ -1,10 +1,10 @@
-<ep-package name="HTML::EP::Explorer" lib="/home/joe/HTML-EP-Explorer/lib">
+<ep-package name="HTML::EP::Explorer">
 <ep-explorer-init>
 <ep-explorer-config file="admin/config.pm">
 <ep-if cnd="'$_ep_language$' eq 'de'">
-  <ep-set var="Title" val="Ausführen der Aktion &quot;$cgi->action$&quot;">
+  <ep-set var="Title" val="Ausführen der Aktion &quot;$cgi->faction$&quot;">
 <ep-else>
-  <ep-set var="Title" val="Executing action &quot;$cgi->action$&quot;">
+  <ep-set var="Title" val="Executing action &quot;$cgi->faction$&quot;">
 </ep-if>
 <html><head><title>$Title$</title></head>
 <body bgcolor=#ffffff>
@@ -17,7 +17,8 @@
   </ep-language>
 </p>
 <pre>
-  <ep-explorer-action action="$cgi->action$" file="$cgi->file$" execute=0>
+  <ep-explorer-action action="$cgi->faction$" file="$cgi->file$"
+		      files="$cgi->files$" execute=0>
 </pre>
 <p>
   <ep-language language="de">
@@ -27,6 +28,7 @@
   </ep-language>
 </p>
 <pre>
-  <ep-explorer-action action="$cgi->action$" file="$cgi->file$" execute=1>
+  <ep-explorer-action action="$cgi->faction$" file="$cgi->file$"
+                      files="$cgi->files$" execute=1>
 </pre>
 </body></html>

@@ -6,7 +6,11 @@ html/action.ep
 html/admin/prefs.ep
 html/folder.gif
 html/index.ep
-html/index.js.ep
+html/listwin.ep
+html/noframes.ep
+html/topwin.ep
 html/prefs.ep
+html/unknown.gif
 lib/HTML/EP/Explorer.pm
+lib/HTML/EP/Explorer/Install.pm
 t/base.t

@@ -1,6 +1,7 @@
 ~$
 ^Makefile(.old)?$
 ^blib/
+^lib/HTML/EP/Explorer/Config.pm$
 ^html/admin/config.pm$
 ^pm_to_blib$
 ^HTML-EP-Explorer-\d+\.\d+\.tar\.gz$

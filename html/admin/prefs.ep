@@ -1,12 +1,15 @@
-<ep-package name=HTML::EP::Explorer accept-language="de,en" lib="/home/joe/HTML-EP-Explorer/lib">
+<ep-package name=HTML::EP::Explorer accept-language="de,en">
 <ep-explorer-config>
-<html><head>
 <ep-if cnd="'$_ep_language$' eq 'de'">
   <ep-set var="Title" val="EP-Explorer: Systemeinstellungen">
   <ep-set var="Ok" val="Einstellungen speichern">
+  <ep-set var="Yes" val="Ja">
+  <ep-set var="No" val="Nein">
 <ep-else>
   <ep-set var="Title" val="EP-Explorer: System Preferences">
   <ep-set var="Ok" val="Save these settings">
+  <ep-set var="Yes" val="Yes">
+  <ep-set var="No" val="No">
 </ep-if>
 <html><head><title>$Title$</title></head>
 <body bgcolor=#ffffff>
@@ -23,33 +26,84 @@
 </p>
 <div align=center>
 <p>
-  <form action="prefs.ep" method=GET>
+  <form action="prefs.ep" method=POST>
   <table>
     <tr><th><ep-language de="E-Mail-Adresse des Administrators:" en="Admins e-mail address:">
         </th>
-        <td><input name="explorer_prefs_email" value="$session->prefs->email$">
+        <td><input name="explorer_config_email"
+		   value="$config->email$">
         </td>
     </tr>
     <tr><th><ep-language de="Aktionen:" en="Actions:"></th>
         <td>
 	  <table>
-            <tr><th>Name</th><th>Icon<br><font size=-1>(Optional)</font></th>
+            <tr><th valign=top>Name</th>
+                <th valign=top>Icon<br><font size=-1>(Optional)</font></th>
                 <th>Skript<br><font size=-1>($file = Filename,<br>
-                $user = User)</font></th>
+                  $user = User)</font></th>
             <ep-list items=actions item=a>
               <tr><td><input name=explorer_action_name value="$a->name$"
-                             size=15></td>
+                             size=20></td>
                   <td><input name=explorer_action_icon value="$a->icon$"
                              size=15></td>
                   <td><input name=explorer_action_script value="$a->script$"
                              size=25></td>
             </ep-list>
-              <tr><td><input name=explorer_action_name size=15></td>
+              <tr><td><input name=explorer_action_name size=20></td>
                   <td><input name=explorer_action_icon size=15></td>
                   <td><input name=explorer_action_script size=25></td>
           </table>
         </td>
     </tr>
+    <tr><th><ep-language de="Startverzeichnisse:" en="Initial directories:">
+	</th>
+	<td>
+	  <table>
+	    <tr><th valign=top><ep-language de="Name" en="Name"></th>
+		<th valign=top><ep-language de="Verzeichnis"
+				en="Directory"></th>
+	    <ep-list items=directories item=d>
+	      <tr><td><input size=20 name=explorer_directory_name
+			value="$d->name$"></td>
+		  <td><input size=40 name=explorer_directory_dir
+			value="$d->dir$"></td></tr>
+	    </ep-list>
+	    <tr><td><input size=20 name=explorer_directory_name></td>
+		<td><input size=40 name=explorer_directory_dir></td>
+	    </tr>
+	  </table>
+	</td></tr>
+<ep-if eval="$num_directories$">
+    <tr><th><ep-language de="Zugriff auf andere Verzeichnisse erlaubt:"
+			 en="Allow access to other directories:"></th>
+	<td><select name=explorer_config_dirs_restricted>
+	      <option value=0>$Yes$
+	      <option value=1 $&SELECTED->config->dirs_restricted$>$No$
+	    </select></td>
+    </tr>
+</ep-if>
+    <tr><th><ep-language de="Dateitypen:" en="File types:"></th>
+        <td>
+	  <table>
+	    <tr><td valign=top><b>Name</b></td>
+                <td valign=top><b>Icon</b><br><font size=-1>(Optional)</font></td>
+                <td><b><ep-language de="Regulärer Ausdruck"
+	                            en="Regular Expression"></b><br>
+	            <font size=-1>(z.B. \.(jpg|jpeg)$ für *.jpg|*.jpeg)</font>
+                </td>
+            <ep-list items=filetypes item=ft>
+              <tr><td><input name=explorer_filetype_name value="$ft->name$"
+                             size=20></td>
+                  <td><input name=explorer_filetype_icon value="$ft->icon$"
+                             size=15></td>
+                  <td><input name=explorer_filetype_re value="$ft->re$"
+                             size=25></td>
+            </ep-list>
+              <tr><td><input name=explorer_filetype_name size=20></td>
+                  <td><input name=explorer_filetype_icon size=15></td>
+                  <td><input name=explorer_filetype_re size=25></td>
+          </table>
+        </td>
   </table>
   <input type=submit name="save" value="$Ok$">
   </form>

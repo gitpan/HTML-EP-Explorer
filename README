@@ -1,4 +1,82 @@
 NAME
-    HTML::EP::Explorer - Web driven browsing of a filesystem
+      HTML::EP::Explorer - Web driven browsing of a filesystem
 
 SYNOPSIS
+      <ep-explorer-browse>
+
+DESCRIPTION
+    This application was developed for DHW, a german company that
+    wanted to give its users access to files stored on a file server
+    via certain applications defined by an administrator. (See
+
+      http://www.dhw.de/
+
+    if you are interested in the sponsor.) The rough idea is as
+    follows:
+
+    The users are presented a view similar to that of the Windows
+    Explorer or an FTP servers directory listing. On the top they
+    have a list of so-called actions. The users may select one or
+    more files and then execute an action on them.
+
+INSTALLATION
+    The system is based on my embedded HTML system HTML::EP. It
+    should be available at the same place where you found this file,
+    or at any CPAN mirror, in particular
+
+      ftp://ftp.funet.fi/pub/languages/perl/CPAN/authors/id/JWIED/
+
+    The installation of HTML::EP is described in detail in the
+    README, I won't explain it here. However, in short it is just as
+    installing HTML::EP::Explorer: Assumed you have a file
+
+      HTML-EP-Explorer-0.1003.tar.gz
+
+    then you have to execute the following steps:
+
+      gzip -cd HTML-EP-Explorer-0.1003.tar.gz | tar xf -
+      perl Makefile.PL
+      make          # You will be prompted some questions here
+      make test
+      make install
+
+    Installation will in particular create a file
+
+      lib/HTML/EP/Explorer/Config.pm
+
+    which will contain your answers to the following questions:
+
+    *       Install HTML files?
+
+            If you say *y* here (the default), the installation
+            script will install some HTML files at a location
+            choosed by you. Usually you will say yes, because the
+            system is pretty useless without it's associated HTML
+            files. However, if you already did install the system
+            and modified the HTML files you probably want to avoid
+            overriding them. In that case say *n*.
+
+    *       Directory for installing HTML files?
+
+            If you requested installing the HTML files, you have to
+            choose a location. By default the program suggests
+
+              F</home/httpd/html/explorer>
+
+            which is fine on a Red Hat Linux box. Users of other
+            systems will modify this to some path below your your
+            web servers root directory.
+
+    *       UID the httpd is running as?
+
+            The explorer scripts need write access to some files, in
+            particular the configuration created by the site
+            administrator. To enable write access, these files are
+            owned by the Unix user you enter here, by default the
+            user *nobody*.
+
+            In most cases this will be the same user that your httpd
+            is running as, but it might be different, for example if
+            your Apache is using the suexec feature. Contact your
+            webmaster for details.
+
