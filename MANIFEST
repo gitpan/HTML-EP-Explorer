@@ -6,6 +6,7 @@ html/action.ep
 html/admin/prefs.ep
 html/folder.gif
 html/index.ep
+html/index.js.ep
 html/prefs.ep
 lib/HTML/EP/Explorer.pm
 t/base.t

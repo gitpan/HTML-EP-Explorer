@@ -33,7 +33,7 @@ use HTML::EP::Session ();
 package HTML::EP::Explorer;
 
 @HTML::EP::Explorer::ISA = qw(HTML::EP::Session HTML::EP::Locale HTML::EP);
-$HTML::EP::Explorer::VERSION = '0.1000';
+$HTML::EP::Explorer::VERSION = '0.1002';
 
 sub init {
     my $self = shift;
@@ -167,9 +167,11 @@ sub _ep_explorer_browse {
     my $dir = HTML::EP::Explorer::Dir->new($basedir);
     my $list = $dir->Read();
     my $output = '';
+    $self->{'i'} = 0;
     foreach my $i (@$list) {
 	$self->{$item} = $i;
 	$output .= $i->AsHtml($self, $item);
+	++$self->{'i'};
     }
 
     $self->_ep_session_store($attr) if $modified;
@@ -293,7 +295,7 @@ sub Read {
     my @list;
     chdir $dir or die "Failed to change directory to $dir: $!";
     opendir($fh, $curdir) or die "Failed to open directory $dir: $!";
-    while (my $f = readdir($fh)) {
+    while (defined(my $f = readdir($fh))) {
 	next if $f eq $curdir;
 	my($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size,
 	   $atime, $mtime, $ctime, $blksize) = stat $f;
