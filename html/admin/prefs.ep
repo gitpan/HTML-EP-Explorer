@@ -1,5 +1,5 @@
 <ep-package name=HTML::EP::Explorer accept-language="de,en">
-<ep-explorer-config>
+<ep-explorer-config maysafe=1>
 <ep-if cnd="'$_ep_language$' eq 'de'">
   <ep-set var="Title" val="EP-Explorer: Systemeinstellungen">
   <ep-set var="Ok" val="Einstellungen speichern">

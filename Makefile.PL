@@ -8,7 +8,6 @@ use Getopt::Long ();
 
 
 use lib "lib";
-use HTML::EP::Explorer::Install ();
 use vars qw($cfg);
 
 
@@ -17,7 +16,9 @@ Getopt::Long::GetOptions('debug' => \$debug, 'config' => \$config);
 # Make sure a Makefile is generated, so that the CPAN module
 # can detect dependencies.
 eval {
-    $cfg = HTML::EP::Explorer::Install->Config();
+    require HTML::EP::Explorer::Install;
+    my $cfg = HTML::EP::Explorer::Install->new();
+    $cfg->Save("lib/HTML/EP/Explorer/Config.pm");
 };
 my $status = $@;
 
@@ -34,7 +35,7 @@ if ($ExtUtils::MakeMaker::VERSION >= 5.43) {
     $opts{'AUTHOR'} = 'Jochen Wiedmann (joe@ispsoft.de)';
     $opts{'PREREQ_PM'} = { 'HTML::EP' => 0.1132,
 			   'Data::Dumper' => 0};
-    $opts{'ABSTRACT_FROM'} = 'lib/HTML/EP/Explorer.pm';
+    $opts{'ABSTRACT'} = 'Web driven browsing of a filesystem';
 }
 
 WriteMakefile(%opts);

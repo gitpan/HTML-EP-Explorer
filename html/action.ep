@@ -17,8 +17,7 @@
   </ep-language>
 </p>
 <pre>
-  <ep-explorer-action action="$cgi->faction$" file="$cgi->file$"
-		      files="$cgi->files$" execute=0>
+  <ep-explorer-action execute=0>
 </pre>
 <p>
   <ep-language language="de">
@@ -28,7 +27,6 @@
   </ep-language>
 </p>
 <pre>
-  <ep-explorer-action action="$cgi->faction$" file="$cgi->file$"
-                      files="$cgi->files$" execute=1>
+  <ep-explorer-action execute=1>
 </pre>
 </body></html>
