@@ -18,17 +18,28 @@ sub Install {
     require HTML::EP::Explorer::Config;
     my $cfg = $HTML::EP::Explorer::Config::config;
     HTML::EP::Install::InstallHtmlFiles('html', $cfg->{'html_base_dir'});
+    HTML::EP::Install::InstallCgiFiles('html/cgi', $cfg->{'html_cgi_dir'});
     # Create an empty config.pm and make it owned by the HTTPD user.
     my $config_path = File::Spec->catfile($cfg->{'html_base_dir'}, "admin",
 					  "config.pm");
     if (!-f $config_path) {
+	my $uid = getpwnam($cfg->{'httpd_user'});
+	print "Creating empty config file $config_path, owned by $uid.\n";
 	(open(FILE, ">>$config_path") and close(FILE))
 	    or die "Failed to create $config_path: $!";
-	my $uid = getpwnam($cfg->{'httpd_user'});
 	chown($uid, 0, $config_path)
 	    or die "Cannot change ownership of $config_path to $uid,0: $!";
 	chmod(0600, $config_path)
 	    or die "Cannot change permissions of $config_path: $!";
+    }
+    my $cache_path = File::Spec->catdir($cfg->{'html_base_dir'}, "status");
+    if (!-d $cache_path) {
+	my $uid = getpwnam($cfg->{'httpd_user'});
+	print "Creating empty status directory $cache_path, owned by $uid.\n";
+	(mkdir $cache_path, 0700)
+	    or die "Failed to create status directory $cache_path: $!";
+	chown($uid, 0, $cache_path)
+	    or die "Cannot change ownership of $cache_path to $uid,0: $!";
     }
 }
 
@@ -55,6 +66,12 @@ sub new {
 	$cfg->{'html_base_dir'} = ExtUtils::MakeMaker::prompt
 	    ("Directory for installing HTML files",
 	     ($cfg->{'html_base_dir'} || "/home/httpd/html/explorer"));
+    }
+    if ($cfg->{'install_html_files'}  &&
+	($config  ||  !$cfg->{'html_cgi_dir'})) {
+	$cfg->{'html_cgi_dir'} = ExtUtils::MakeMaker::prompt
+	    ("Directory for installing CGI binaries",
+	     $cfg->{'html_cgi_dir'} || "$cfg->{'html_base_dir'}/cgi");
     }
     if ($config  ||  !$cfg->{'httpd_user'}) {
 	$cfg->{'httpd_user'} = ExtUtils::MakeMaker::prompt

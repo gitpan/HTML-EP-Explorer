@@ -33,7 +33,7 @@ use HTML::EP::Session ();
 package HTML::EP::Explorer;
 
 @HTML::EP::Explorer::ISA = qw(HTML::EP::Session HTML::EP::Locale HTML::EP);
-$HTML::EP::Explorer::VERSION = '0.1004';
+$HTML::EP::Explorer::VERSION = '0.1005';
 
 sub init {
     my $self = shift;
@@ -95,10 +95,17 @@ sub ReadActions {
     my @names = $cgi->param('explorer_action_name');
     my @icons = $cgi->param('explorer_action_icon');
     my @scripts = $cgi->param('explorer_action_script');
+    my @stati = $cgi->param('explorer_action_status');
+    my @logfiles = $cgi->param('explorer_action_logfile');
+    my $i = 0;
     foreach my $name (@names) {
 	push(@actions, {'name' => $name,
-			'icon' => shift(@icons),
-			'script' => shift(@scripts)}) if $name;
+			'icon' => $icons[$i],
+			'script' => $scripts[$i],
+			'status' => $stati[$i],
+			'logfile' => $logfiles[$i]
+		        }) if $name;
+	++$i;
     }
     \@actions;
 }
@@ -111,10 +118,13 @@ sub ReadFileTypes {
     my @names = $cgi->param('explorer_filetype_name');
     my @icons = $cgi->param('explorer_filetype_icon');
     my @res = $cgi->param('explorer_filetype_re');
+    my $i = 0;
     foreach my $name (@names) {
 	push(@filetypes, {'name' => $name,
-			  'icon' => shift(@icons),
-			  're' => shift(@res)}) if $name;
+			  'icon' => $icons[$i],
+			  're' => $res[$i]
+			  }) if $name;
+	++$i;
     }
     \@filetypes;
 }
@@ -127,9 +137,10 @@ sub ReadDirectories {
     my @names = $cgi->param('explorer_directory_name');
     my @dirs = $cgi->param('explorer_directory_dir');
     my $pwd;
+    my $i = 0;
     foreach my $name (@names) {
 	next unless $name;
-	my $dir = shift(@dirs);
+	my $dir = $dirs[$i];
 	# Don't save the name, that the user gave us. Save the physical
 	# filesystem path, so that we can later compare it to paths
 	# requested by other users, if "Allow access to other directories"
@@ -139,6 +150,7 @@ sub ReadDirectories {
 	$dir = Cwd::cwd();
 	push(@directories, {'name' => $name,
 			    'dir' => $dir});
+	++$i;
     }
     chdir $pwd if $pwd;
     \@directories;
@@ -408,12 +420,12 @@ sub _format_ACTIONS {
     $str;
 }
 
-sub _ep_explorer_action {
-    my $self = shift;  my $attr = shift;
+sub FindAction {
+    my $self = shift; my $attr = shift;
     my $cgi = $self->{'cgi'};
+    my $name = $cgi->param('faction') || $attr->{'faction'} ||
+	die "Missing action name";
     my $debug = $self->{'debug'};
-    my $name = $cgi->param('faction') || $attr->{'faction'}
-	|| die "Missing action name";
     $self->print("_ep_explorer_action: $name\n") if $debug;
     my $action;
     foreach my $a (@{$self->{'actions'}}) {
@@ -424,6 +436,112 @@ sub _ep_explorer_action {
     }
     $self->{'action'} = $action or die "Unknown action: $name";
     $self->print("Selected action is $action->{'name'}\n") if $debug;
+    $action;
+}
+
+
+sub _ep_explorer_logfile {
+    my $self = shift; my $attr = shift;
+    my $debug = $self->{'debug'};
+    my $action = $self->FindAction({});
+    my $fh = Symbol::gensym();
+    require Fcntl;
+    $self->print("Opening logfile: $action->{'logfile'}\n") if $debug;
+    sysopen($fh, $action->{'logfile'}, Fcntl::O_RDONLY())
+	or die "Failed to open logfile $action->{'logfile'}: $!";
+    $self->Stop();
+    my $cgi = $self->{'cgi'};
+    $self->print($cgi->header('-type' => 'text/plain'));
+    $self->print("\n");
+    seek($fh, -2000, 2);
+    $| = 1;
+    my $pos;
+    local $/ = undef;
+    while(1) {
+	$pos = tell($fh);
+	if (eof($fh)) {
+	    sleep 15;
+	    seek($fh, $pos, 0);
+	} else {
+	    my $line = <$fh>;
+	    if (!defined($line)) {
+		$self->print("Failed to read: $!");
+		last;
+	    } else {
+		$self->print($line);
+	    }
+	}
+    }
+    '';
+}
+
+
+sub _ep_explorer_queue {
+    my $self = shift;  my $attr = shift;
+    my $cgi = $self->{'cgi'};
+    my $debug = $self->{'debug'};
+    my $action = $self->FindAction($attr);
+    my $input;
+    my $file = File::Spec->catfile("status",
+				   URI::Escape::uri_escape($action->{'name'}));
+    if ($self->{'config'}->{'cache'}) {
+	my($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime,
+	   $mtime) = stat $file;
+	my $regen_time = $mtime + $self->{'config'}->{'cache'};
+	$self->print("Cache file $file ",
+		     -f _ ? "exists.\n" : "doesn't exist.\n",
+		     -f _ ? "Modification time is $mtime, current time is " .
+		            time() . ", regeneration time is $regen_time\n"
+		          : "") if $debug;
+	if (-f _  &&  $regen_time > time()) {
+	    $self->print("Trying to load cache file $file.\n") if $debug;
+	    require Fcntl;
+	    my $fh = Symbol::gensym();
+	    if (open($fh, "<$file")  and  flock($fh, Fcntl::LOCK_SH())) {
+		local $/ = undef;
+		$input = <$fh>;
+	    }
+	    $self->print($input ? "Got:\n$input\n" : "Not successful ($!)\n")
+		if $debug;
+	}
+    }
+    if (!$input) {
+	my $command = $action->{'status'};
+	local $ENV{'user'} = quotemeta($self->User());
+	$input = `$command 2>&1`;
+	if ($self->{'config'}->{'cache'}) {
+	    require Fcntl;
+	    my $fh = Symbol::gensym();
+	    if (sysopen($fh, $file, Fcntl::O_RDWR()|Fcntl::O_CREAT())
+		and flock($fh, Fcntl::LOCK_EX())) {
+		print $fh $input;
+		truncate($fh, length($input));
+	    }
+	}
+    }
+
+    my @status;
+    foreach my $line (split(/\n/, $input)) {
+	if ($line =~ /^(\S+)\s+(\S+)\s+(\d+)\s+(\S.*?)\s+(\d+)\s+bytes/) {
+	    push(@status, { 'rank' => $1,
+			    'owner' => $2,
+			    'job' => $3,
+			    'file' => $4,
+			    'size' => $5 });
+	}
+    }
+    $self->{'status'} = \@status;
+    $self->{'status_num'} = @status;
+    '';
+}
+
+sub _ep_explorer_action {
+    my $self = shift;  my $attr = shift;
+    my $cgi = $self->{'cgi'};
+    my $debug = $self->{'debug'};
+    my $name = $cgi->param('faction') || $attr->{'faction'}
+	|| die "Missing action name";
+    my $action = $self->FindAction($attr);
 
     my @files;
     my $file;
@@ -456,7 +574,7 @@ sub _ep_explorer_action {
 	$command = join(";", @commands);
     }
     $self->print("Selected command is $command\n") if $debug;
-    local $ENV{'user'} = $self->User();
+    local $ENV{'user'} = quotemeta($self->User());
     local $ENV{'files'} = $files if $files;
     if ($attr->{'execute'}) {
 	return `$command`;
@@ -681,6 +799,21 @@ this to some path below your your web servers root directory.
 
 =item *
 
+  Directory for installing CGI binaries?
+
+If HTML files are installed, you must install some CGI binaries too.
+This question allows you to select an installation path, by default
+the subdirectory F<cgi> within the directory for installing HTML
+files.
+
+Note that you need to configure the httpd so that it treats this
+directory as a CGI directory. For example Apache users may add the
+following to F<srm.conf>:
+
+  ScriptAlias /home/httpd/html/explorer/cgi
+
+=item *
+
   UID the httpd is running as?
 
 The explorer scripts need write access to some files, in particular the
@@ -802,6 +935,20 @@ then you may prefer
 The Explorer will detect that you are using B<$files> and not B<$file>
 and will run a single command.
 
+=item Status script
+
+Similar to the action script, this one will try to guess the current status.
+A typical command might be
+
+  lpq -Plaserjet -U $user
+
+The status script is suggested to produce output looking like that of
+lpq.
+
+=item Logfile
+
+Path of a logfile to view
+
 =back
 
 Note that you see only one (empty) action at the start: If you
@@ -811,6 +958,19 @@ one empty row at the bottom.
 
 Actions can be removed by just blanking out the name and hitting
 I<Save settings>.
+
+
+=head2 Status cache
+
+To save CPU time, you might like to make use of the Status cache.
+By setting this variable to a certain number of seconds, say 300,
+the Explorer will not always run the status script. Instead it
+will create a cache file in the subdirectory F<status> and save
+the status script's output there. When the status is queried the
+next time, this cache file will be used, unless the cache file's
+modification time is more that the given number of seconds in the
+past. In that case a new cache file will be created by running
+the status script again.
 
 
 =head2 Initial directories

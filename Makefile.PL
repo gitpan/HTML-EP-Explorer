@@ -17,7 +17,7 @@ Getopt::Long::GetOptions('debug' => \$debug, 'config' => \$config);
 # can detect dependencies.
 eval {
     require HTML::EP::Explorer::Install;
-    my $cfg = HTML::EP::Explorer::Install->new();
+    $cfg = HTML::EP::Explorer::Install->new();
     $cfg->Save("lib/HTML/EP/Explorer/Config.pm");
 };
 my $status = $@;
@@ -27,7 +27,10 @@ my %opts = (
     'dist'      => { SUFFIX   => '.gz', DIST_DEFAULT => 'all tardist',
                      COMPRESS => 'gzip -9vf' },
     'VERSION_FROM' => 'lib/HTML/EP/Explorer.pm',
-    'clean' => { FILES => 'lib/HTML/EP/Explorer/Config.pm' }
+    'clean' => { FILES => 'lib/HTML/EP/Explorer/Config.pm' },
+    'PL_FILES' => {
+	'html/cgi/nph-logfile.cgi.PL' => 'html/cgi/nph-logfile.cgi'
+    }
 );
 
 
@@ -65,4 +68,5 @@ install ::
 \t\$(PERL) -I\$(INST_ARCHLIB) -I\$(INST_LIB) -MHTML::EP::Explorer::Install -e Install
 
 END_OF_POSTAMBLE
+    return $postamble;
 }

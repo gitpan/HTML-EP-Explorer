@@ -41,6 +41,10 @@
                 <th valign=top>Icon<br><font size=-1>(Optional)</font></th>
                 <th>Skript<br><font size=-1>($file = Filename,<br>
                   $user = User)</font></th>
+		<th><ep-language de="Status-Skript" en="Status script"><br>
+		    <font size=-1>($user = User)</font></th>
+		<th>Logfile</th>
+	    </tr>
             <ep-list items=actions item=a>
               <tr><td><input name=explorer_action_name value="$a->name$"
                              size=20></td>
@@ -48,12 +52,30 @@
                              size=15></td>
                   <td><input name=explorer_action_script value="$a->script$"
                              size=25></td>
+		  <td><input name=explorer_action_status value="$a->status$"
+			     size=25></td>
+		  <td><input name=explorer_action_logfile value="$a->logfile$"
+			     size=20></td>
             </ep-list>
               <tr><td><input name=explorer_action_name size=20></td>
                   <td><input name=explorer_action_icon size=15></td>
                   <td><input name=explorer_action_script size=25></td>
+		  <td><input name=explorer_action_status size=25></td>
+		  <td><input name=explorer_action_logfile size=20></td>
           </table>
         </td>
+    <tr><th><ep-language de="Status-Cache:" en="Status cache:"><br>
+	    <font size=-1>
+	      <ep-language de="(Sekunden, nach denen ein Reload erfolgt)"
+			   en="(Seconds to wait for a reload)"><br>
+	      <ep-language de="(Caching unterbinden mit 0)"
+			   en="(0 to disable)"><br>
+
+	    </font>
+	</th>
+        <td>
+	  <input size=5 name=explorer_config_cache value=$config->cache$>
+	</td>
     </tr>
     <tr><th><ep-language de="Startverzeichnisse:" en="Initial directories:">
 	</th>

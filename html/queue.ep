@@ -1,0 +1,51 @@
+<ep-package name="HTML::EP::Explorer">
+<ep-explorer-config file="admin/config.pm">
+<ep-explorer-queue>
+<ep-if cnd="'$_ep_language$' eq 'de'">
+  <ep-set var=Title val="Warteschlange '$action->name$'">
+  <ep-set var=Reload val="Neu laden">
+<ep-else>
+  <ep-set var=Title val="Queue $action->name$">
+  <ep-set var=Reload val="Reload">
+</ep-if>
+<head><title>$Title$</title>
+<ep-if eval="$config->cache$">
+  <meta http-equiv="refresh" content="$config->cache$; URL=queue.ep?language=$_ep_language$&faction=$#cgi->faction$">
+</ep-if>
+</head>
+<body bgcolor=#ffffff>
+<h1>$Title$</h1>
+<div align=center>
+<ep-if eval="$status_num$">
+  <table border=1>
+    <tr><th><ep-language de="Nr." en="Rank"></th>
+	<th><ep-language de="Benutzer" en="Owner"></th>
+	<th><ep-language de="Job-Nr." en="Job"></th>
+	<th><ep-language de="Dateiname" en="File name"></th>
+	<th><ep-language de="Größe" en="Size"></th>
+    </tr>
+  <ep-list items=status item=s>
+    <tr><td>$s->rank$</td><td>$s->owner$</td><td>$s->job$</td>
+	<td>$s->file$</td><td>$s->size$</td>
+    </tr>
+  </ep-list>
+  </table>
+<ep-else>
+  <p>
+    <ep-language de="Die Warteschlange ist leer." en="The queue is empty.">
+  </p>
+</ep-if>
+<p>
+  <ep-if eval="$config->cache$">
+    <ep-language language="de">
+      Diese Seite lädt sich selbst neu in $config->cache$ Sekunden.
+    <ep-language language="en">
+      This page will reload itself in $config->cache$ seconds.
+    </ep-language>
+  </ep-if>
+</p>
+<p>
+  <a href="queue.ep?language=$_ep_language$&faction=$#cgi->faction$">$Reload$</a>
+</p>
+</div>
+</body></html>
