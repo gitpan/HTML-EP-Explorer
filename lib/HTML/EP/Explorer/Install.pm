@@ -18,7 +18,6 @@ sub Install {
     require HTML::EP::Explorer::Config;
     my $cfg = $HTML::EP::Explorer::Config::config;
     HTML::EP::Install::InstallHtmlFiles('html', $cfg->{'html_base_dir'});
-    HTML::EP::Install::InstallCgiFiles('html/cgi', $cfg->{'html_cgi_dir'});
     # Create an empty config.pm and make it owned by the HTTPD user.
     my $config_path = File::Spec->catfile($cfg->{'html_base_dir'}, "admin",
 					  "config.pm");

@@ -31,7 +31,7 @@
     <tr><th><ep-language de="E-Mail-Adresse des Administrators:" en="Admins e-mail address:">
         </th>
         <td><input name="explorer_config_email"
-		   value="$config->email$">
+		   value="$config->email$" size=50>
         </td>
     </tr>
     <tr><th><ep-language de="Aktionen:" en="Actions:"></th>
@@ -44,6 +44,7 @@
 		<th><ep-language de="Status-Skript" en="Status script"><br>
 		    <font size=-1>($user = User)</font></th>
 		<th>Logfile</th>
+		<th>Variablen</th>
 	    </tr>
             <ep-list items=actions item=a>
               <tr><td><input name=explorer_action_name value="$a->name$"
@@ -56,14 +57,50 @@
 			     size=25></td>
 		  <td><input name=explorer_action_logfile value="$a->logfile$"
 			     size=20></td>
+		  <td><textarea name=explorer_action_vars>$a->vars$</textarea></td>
+	      </tr>
             </ep-list>
               <tr><td><input name=explorer_action_name size=20></td>
                   <td><input name=explorer_action_icon size=15></td>
                   <td><input name=explorer_action_script size=25></td>
 		  <td><input name=explorer_action_status size=25></td>
 		  <td><input name=explorer_action_logfile size=20></td>
+		  <td><textarea name=explorer_action_vars></textarea></td>
           </table>
         </td>
+    <tr><th><ep-language de="Status-Aktionen:" en="Status actions:"></th>
+        <td>
+	  <table>
+	    <tr><th valign=top>Name</th>
+		<th valign=top>Icon<br><font size=-1>(Optional)</font></th>
+		<th>Skript<br>
+		    <font size=-1>
+		      <ep-language language="de">
+			($job = Jobnummer, $user = User,
+			andere Variablen nach Liste aus Aktionen)
+		      <ep-language language="en">
+			($job = Job number, $user = User,
+			other variables as in list of actions)
+		      </ep-language>
+		    </font>
+		</th>
+	    </tr>
+	  <ep-list items=status_actions item=sa>
+	    <tr><td><input name=explorer_status_action_name
+	                   value="$sa->name$"></td>
+	        <td><input name=explorer_status_action_icon
+                           value="$sa->icon$"></td>
+	        <td><input name=explorer_status_action_script
+                           value="$sa->script$"></td>
+	    </tr>
+	  </ep-list>
+	    <tr><td><input name=explorer_status_action_name></td>
+	        <td><input name=explorer_status_action_icon></td>
+	        <td><input name=explorer_status_action_script></td>
+	    </tr>
+	  </table>
+        </td>
+    </tr>
     <tr><th><ep-language de="Status-Cache:" en="Status cache:"><br>
 	    <font size=-1>
 	      <ep-language de="(Sekunden, nach denen ein Reload erfolgt)"
@@ -126,6 +163,17 @@
                   <td><input name=explorer_filetype_re size=25></td>
           </table>
         </td>
+    <tr><th><ep-language de="&Uuml;berschrift der Hauptseite:"
+                         en="Header of the main page:"></th>
+        <td><input name="explorer_config_header_main"
+		   value="$config->header_main$" size=50></td>
+    </tr>
+    <tr><th><ep-language de="&Uuml;berschrift der Dateienseite:"
+                         en="Header of the files page:">
+        </th>
+        <td><input name="explorer_config_header_files"
+		   value="$config->header_files$" size=50></td>
+    </tr>
   </table>
   <input type=submit name="save" value="$Ok$">
   </form>

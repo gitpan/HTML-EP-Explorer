@@ -61,7 +61,11 @@
 </script>
 </head>
 <body bgcolor=#ffffff onLoad="List(0)">
-<h1><ep-language de="HTML-Explorer" en="HTML Explorer"></h1>
+<h1><ep-if eval="$config->header_main$">
+      $config->header_main$
+    <ep-else>
+      <ep-language de="HTML-Explorer" en="HTML Explorer">
+    </ep-if></h1>
 <form name=explorer_top_form action=topwin.ep method=GET>
   <input type=hidden name=language value="$_ep_language$">
   <p>

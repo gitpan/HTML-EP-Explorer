@@ -88,7 +88,15 @@
 </script>
 </head>
 <body bgcolor=#ffffff>
-<h1><ep-if eval="$in_base_dir$">$in_base_dir->name$: </ep-if>$display_dir$</h1>
+<h1><ep-if eval="$in_base_dir$">
+      $in_base_dir->name$:
+    </ep-if>
+    <ep-if eval="$config->header_files$">
+      $config->header_files$
+    <ep-else>
+      $display_dir$
+    </ep-if>
+</h1>
 <form name="explorer_action_form" action=action.ep method=GET target=_new>
   <input type=hidden name="language" value="$_ep_language$">
   <input type=hidden name="file" value="">

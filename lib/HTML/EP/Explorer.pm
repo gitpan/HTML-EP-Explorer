@@ -18,7 +18,7 @@
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
 #
-#   $Id$
+#   $Id: Explorer.pm,v 1.2 1999/11/04 12:24:10 joe Exp $
 #
 
 use strict;
@@ -33,7 +33,7 @@ use HTML::EP::Session ();
 package HTML::EP::Explorer;
 
 @HTML::EP::Explorer::ISA = qw(HTML::EP::Session HTML::EP::Locale HTML::EP);
-$HTML::EP::Explorer::VERSION = '0.1005';
+$HTML::EP::Explorer::VERSION = '0.1006';
 
 sub init {
     my $self = shift;
@@ -88,72 +88,43 @@ sub InitialConfig {
     }
 }
 
-sub ReadActions {
-    my $self = shift;
-    my $cgi = $self->{'cgi'};
-    my @actions;
-    my @names = $cgi->param('explorer_action_name');
-    my @icons = $cgi->param('explorer_action_icon');
-    my @scripts = $cgi->param('explorer_action_script');
-    my @stati = $cgi->param('explorer_action_status');
-    my @logfiles = $cgi->param('explorer_action_logfile');
-    my $i = 0;
-    foreach my $name (@names) {
-	push(@actions, {'name' => $name,
-			'icon' => $icons[$i],
-			'script' => $scripts[$i],
-			'status' => $stati[$i],
-			'logfile' => $logfiles[$i]
-		        }) if $name;
-	++$i;
-    }
-    \@actions;
-}
 
-
-sub ReadFileTypes {
-    my $self = shift;
+sub ReadArray {
+    my $self = shift;  my $prefix = shift;
     my $cgi = $self->{'cgi'};
-    my @filetypes;
-    my @names = $cgi->param('explorer_filetype_name');
-    my @icons = $cgi->param('explorer_filetype_icon');
-    my @res = $cgi->param('explorer_filetype_re');
-    my $i = 0;
-    foreach my $name (@names) {
-	push(@filetypes, {'name' => $name,
-			  'icon' => $icons[$i],
-			  're' => $res[$i]
-			  }) if $name;
-	++$i;
+    my %hash;
+    foreach my $key ($cgi->param()) {
+	next unless $key =~ /^$prefix(.*)/;
+	$self->print("ReadArray: Found key $key, saving as $1 (",
+		     join(",", $cgi->param($key)), "\n") if $self->{'debug'};
+	$hash{$1} = [$cgi->param($key)];
     }
-    \@filetypes;
+    my @array;
+    while (@{$hash{'name'}}) {
+	my %h;
+	while (my($var, $val) = each %hash) {
+	    $h{$var} = shift @$val;
+	}
+	push(@array, \%h) if $h{'name'};
+    }
+    \@array;
 }
 
 
 sub ReadDirectories {
-    my $self = shift;
-    my $cgi = $self->{'cgi'};
-    my @directories;
-    my @names = $cgi->param('explorer_directory_name');
-    my @dirs = $cgi->param('explorer_directory_dir');
+    my $dirs = shift()->ReadArray('explorer_directory_');
     my $pwd;
-    my $i = 0;
-    foreach my $name (@names) {
-	next unless $name;
-	my $dir = $dirs[$i];
+    foreach my $dir (@$dirs) {
 	# Don't save the name, that the user gave us. Save the physical
 	# filesystem path, so that we can later compare it to paths
 	# requested by other users, if "Allow access to other directories"
 	# is off.
 	$pwd = Cwd::cwd() unless $pwd;
-	chdir($dir) or die "Failed to change directory to $dir: $!";
-	$dir = Cwd::cwd();
-	push(@directories, {'name' => $name,
-			    'dir' => $dir});
-	++$i;
+	chdir($dir->{'dir'}) or die "Failed to change directory to $dir: $!";
+	$dir->{'dir'} = Cwd::cwd();
     }
     chdir $pwd if $pwd;
-    \@directories;
+    $dirs;
 }
 
 
@@ -167,8 +138,9 @@ sub ReadConfig {
 	$config->{$v} = $cgi->param($var);
     }
 
-    $config->{'actions'} = $self->ReadActions();
-    $config->{'filetypes'} = $self->ReadFileTypes();
+    $config->{'actions'} = $self->ReadArray('explorer_action_');
+    $config->{'status_actions'} = $self->ReadArray('explorer_status_action_');
+    $config->{'filetypes'} = $self->ReadArray('explorer_filetype_');
     $config->{'directories'} = $self->ReadDirectories();
     $config;
 }
@@ -192,6 +164,7 @@ sub _ep_explorer_config {
 	    or die "Failed to create $file: $!";
     }
     $self->{'actions'} = $self->{'config'}->{'actions'};
+    $self->{'status_actions'} = $self->{'config'}->{'status_actions'};
     $self->{'directories'} = $self->{'config'}->{'directories'};
     $self->{'filetypes'} = $self->{'config'}->{'filetypes'};
     $self->{'num_directories'} = @{$self->{'directories'}};
@@ -426,7 +399,7 @@ sub FindAction {
     my $name = $cgi->param('faction') || $attr->{'faction'} ||
 	die "Missing action name";
     my $debug = $self->{'debug'};
-    $self->print("_ep_explorer_action: $name\n") if $debug;
+    $self->print("FindAction: Looking for $name\n") if $debug;
     my $action;
     foreach my $a (@{$self->{'actions'}}) {
 	if ($a->{'name'} eq $name) {
@@ -437,6 +410,21 @@ sub FindAction {
     $self->{'action'} = $action or die "Unknown action: $name";
     $self->print("Selected action is $action->{'name'}\n") if $debug;
     $action;
+}
+
+sub FindStatusAction {
+    my $self = shift;  my $script = shift;  my $attr = shift;
+    my $debug = $self->{'debug'};
+    $self->print("FindStatusAction: Looking for $script\n") if $debug;
+    my $action;
+    foreach my $sa (@{$self->{'status_actions'}}) {
+	if ($sa->{'name'} eq $script) {
+	    $self->print("FindStatusAction: Returning ",
+			 join(",", %$sa), "\n") if $debug;
+	    return $sa;
+	}
+    }
+    die "FindStatusAction: Unknown script $script";
 }
 
 
@@ -481,10 +469,32 @@ sub _ep_explorer_queue {
     my $cgi = $self->{'cgi'};
     my $debug = $self->{'debug'};
     my $action = $self->FindAction($attr);
+
+    my $ignore_cache;
+    if (my $script = $cgi->param('script')) {
+	my $status_action = $self->FindStatusAction($script, $attr);
+        my %env = %ENV;
+        $env{'job'} = quotemeta($cgi->param('job'));
+        $env{'user'} = quotemeta($self->User());
+        foreach my $var (split(/\n/, $action->{'vars'})) {
+	    if ($var =~ /^\s*(.*?)\s*=\s*(.*?)\s*$/) {
+		$env{$1} = $2;
+	    }
+        }
+        local %ENV = %env;
+	if ($debug) {
+	    my $command = $status_action->{'script'};
+	    $command =~ s/\$(\w+)/$ENV{$1}/g;
+	    $self->print("_ep_explorer_queue: Executing command ($command)\n");
+	}
+        system "$status_action->{'script'} >/dev/null";
+	$ignore_cache = 1;
+    }
+
     my $input;
     my $file = File::Spec->catfile("status",
-				   URI::Escape::uri_escape($action->{'name'}));
-    if ($self->{'config'}->{'cache'}) {
+				   $cgi->escape($action->{'name'}));
+    if (!$ignore_cache  &&  $self->{'config'}->{'cache'}) {
 	my($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime,
 	   $mtime) = stat $file;
 	my $regen_time = $mtime + $self->{'config'}->{'cache'};

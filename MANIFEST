@@ -3,8 +3,8 @@ MANIFEST.SKIP
 Makefile.PL			Makefile generator
 README				I mean it! :-)
 html/action.ep
+html/admin/index.ep
 html/admin/prefs.ep
-html/cgi/nph-logfile.cgi.PL
 html/folder.gif
 html/index.ep
 html/listwin.ep

@@ -28,15 +28,12 @@ my %opts = (
                      COMPRESS => 'gzip -9vf' },
     'VERSION_FROM' => 'lib/HTML/EP/Explorer.pm',
     'clean' => { FILES => 'lib/HTML/EP/Explorer/Config.pm' },
-    'PL_FILES' => {
-	'html/cgi/nph-logfile.cgi.PL' => 'html/cgi/nph-logfile.cgi'
-    }
 );
 
 
 if ($ExtUtils::MakeMaker::VERSION >= 5.43) {
     $opts{'AUTHOR'} = 'Jochen Wiedmann (joe@ispsoft.de)';
-    $opts{'PREREQ_PM'} = { 'HTML::EP' => 0.1132,
+    $opts{'PREREQ_PM'} = { 'HTML::EP' => 0.2003,
 			   'Data::Dumper' => 0};
     $opts{'ABSTRACT'} = 'Web driven browsing of a filesystem';
 }
