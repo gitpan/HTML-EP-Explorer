@@ -1,0 +1,11 @@
+MANIFEST		This file
+MANIFEST.SKIP
+Makefile.PL		Makefile generator
+README			I mean it! :-)
+html/action.ep
+html/admin/prefs.ep
+html/folder.gif
+html/index.ep
+html/prefs.ep
+lib/HTML/EP/Explorer.pm
+t/base.t

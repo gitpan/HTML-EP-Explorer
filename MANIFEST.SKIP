@@ -1,0 +1,5 @@
+~$
+^Makefile(.old)?$
+^blib/
+^html/admin/config.pm$
+^pm_to_blib$

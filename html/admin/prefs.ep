@@ -1,0 +1,58 @@
+<ep-package name=HTML::EP::Explorer accept-language="de,en" lib="/home/joe/HTML-EP-Explorer/lib">
+<ep-explorer-config>
+<html><head>
+<ep-if cnd="'$_ep_language$' eq 'de'">
+  <ep-set var="Title" val="EP-Explorer: Systemeinstellungen">
+  <ep-set var="Ok" val="Einstellungen speichern">
+<ep-else>
+  <ep-set var="Title" val="EP-Explorer: System Preferences">
+  <ep-set var="Ok" val="Save these settings">
+</ep-if>
+<html><head><title>$Title$</title></head>
+<body bgcolor=#ffffff>
+<h1>$Title$</h1>
+<p>
+  <ep-language language="de">
+    Auf dieser Seite können Sie die Systemeinstellungen des
+    <a href="http://www.ispsoft.de/products/ep/explorer/">EP-Explorer</a>
+    festlegen.
+  <ep-language language="en">
+    This page allows you to customize the system settings of the
+    <a href="http://www.ispsoft.de/products/ep/explorer/">EP-Explorer</a>.
+  </ep-language>
+</p>
+<div align=center>
+<p>
+  <form action="prefs.ep" method=GET>
+  <table>
+    <tr><th><ep-language de="E-Mail-Adresse des Administrators:" en="Admins e-mail address:">
+        </th>
+        <td><input name="explorer_prefs_email" value="$session->prefs->email$">
+        </td>
+    </tr>
+    <tr><th><ep-language de="Aktionen:" en="Actions:"></th>
+        <td>
+	  <table>
+            <tr><th>Name</th><th>Icon<br><font size=-1>(Optional)</font></th>
+                <th>Skript<br><font size=-1>($file = Filename,<br>
+                $user = User)</font></th>
+            <ep-list items=actions item=a>
+              <tr><td><input name=explorer_action_name value="$a->name$"
+                             size=15></td>
+                  <td><input name=explorer_action_icon value="$a->icon$"
+                             size=15></td>
+                  <td><input name=explorer_action_script value="$a->script$"
+                             size=25></td>
+            </ep-list>
+              <tr><td><input name=explorer_action_name size=15></td>
+                  <td><input name=explorer_action_icon size=15></td>
+                  <td><input name=explorer_action_script size=25></td>
+          </table>
+        </td>
+    </tr>
+  </table>
+  <input type=submit name="save" value="$Ok$">
+  </form>
+</p>
+</div>
+</body></html>
